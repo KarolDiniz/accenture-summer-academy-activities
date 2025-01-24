@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de CEP</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 26px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result, .error {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .error {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Consulta de CEP</h1>
+    <input type="text" id="cep" placeholder="Digite o CEP (apenas números)">
+    <button onclick="consultarCep()">Consultar</button>
+    <div id="resultado"></div>
+</div>
+
+<script>
+    async function consultarCep() {
+        const cep = document.getElementById('cep').value.trim();
+        const resultado = document.getElementById('resultado');
+        resultado.innerHTML = '';
+
+        if (!cep) {
+            resultado.innerHTML = '<div class="error"><p>Por favor, insira um CEP válido.</p></div>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/${cep}`);
+
+            if (response.ok) {
+                const endereco = await response.json();
+                resultado.innerHTML = `
+                        <div class="result">
+                            <p><strong>CEP:</strong> ${endereco.cep}</p>
+                            <p><strong>Logradouro:</strong> ${endereco.logradouro}</p>
+                            <p><strong>Complemento:</strong> ${endereco.complemento || "Não informado"}</p>
+                            <p><strong>Bairro:</strong> ${endereco.bairro}</p>
+                            <p><strong>Cidade:</strong> ${endereco.localidade}</p>
+                            <p><strong>Estado:</strong> ${endereco.uf}</p>
+                            <p><em>Endereço salvo no banco de dados.</em></p>
+                        </div>`;
+            } else {
+                resultado.innerHTML = '<div class="error"><p>CEP não encontrado.</p></div>';
+            }
+        } catch (error) {
+            resultado.innerHTML = '<div class="error"><p>Ocorreu um erro ao consultar o CEP.</p></div>';
+            console.error(error);
+        }
+    }
+</script>
+</body>
+</html>
